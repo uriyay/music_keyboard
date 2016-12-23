@@ -5,7 +5,13 @@ import wave
 import pygame
 import sys
 
-CHUNK = 5000
+# just a dummy, really calculated below
+CHUNK = 100000
+
+# the higher, the nicer
+NICENESS_SCALE = 5
+
+SEC_PER_KEY = 0.15 * NICENESS_SCALE
 
 wf = None
 
@@ -18,7 +24,6 @@ def hook_callback(event):
         else:
             my_sound = pygame.mixer.Sound(buffer(wf.readframes(CHUNK)))
             my_sound.play()
-            my_sound.fadeout(200)
 
 def init(path):
     global wf
@@ -32,7 +37,11 @@ def uninstall():
     keyboard.unhook(hook_callback)
 
 if __name__ == '__main__':
+    global CHUNK
+
     init(sys.argv[1])
+
+    CHUNK = int(SEC_PER_KEY * wf.getframerate())
     install()
     raw_input()
     uninstall()
