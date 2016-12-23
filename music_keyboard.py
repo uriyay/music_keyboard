@@ -9,21 +9,23 @@ import sys
 CHUNK = 100000
 
 # the higher, the nicer
-NICENESS_SCALE = 5
+NICENESS_SCALE = 0.3
 
 SEC_PER_KEY = 0.15 * NICENESS_SCALE
 
 wf = None
 
+g_need_to_play = 0
+
 def hook_callback(event):
-    print '{}: {} ({})'.format(event.time, event.name, event.scan_code)
+    global g_need_to_play
+
     if wf is not None:
-        if pygame.mixer.get_busy():
-            #TODO: We need to identify that the sound isn't over yet
-            print 'wait'
-        else:
-            my_sound = pygame.mixer.Sound(buffer(wf.readframes(CHUNK)))
+	g_need_to_play += CHUNK	
+        if not pygame.mixer.get_busy():
+            my_sound = pygame.mixer.Sound(buffer(wf.readframes(g_need_to_play)))
             my_sound.play()
+	    g_need_to_play = 0
 
 def init(path):
     global wf
@@ -37,7 +39,6 @@ def uninstall():
     keyboard.unhook(hook_callback)
 
 if __name__ == '__main__':
-    global CHUNK
 
     init(sys.argv[1])
 
